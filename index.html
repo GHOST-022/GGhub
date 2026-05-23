@@ -1,0 +1,2571 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="36x36" href="gg.png" />
+    <title>GGhub</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- FontAwesome Icons -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Google Fonts (Tajawal for Arabic) -->
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap");
+
+      body {
+        font-family: "Tajawal", sans-serif;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #111827;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #8b5cf6;
+        border-radius: 5px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #7c3aed;
+      }
+
+      /* Gradient Text Animation */
+      .gradient-text {
+        background: linear-gradient(to left, #ffdf00, #d4af37);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* Toast Animation */
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+      .toast-enter {
+        animation: slideIn 0.3s forwards;
+      }
+      .toast-exit {
+        animation: slideOut 0.3s forwards;
+      }
+    </style>
+
+    <!-- Tailwind Config for RTL and Custom Colors -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                purple: "#8b5cf6",
+                dark: "#0f172a",
+                card: "#1e293b",
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-black text-gray-100 antialiased overflow-x-hidden">
+    <!-- Particle Canvas Background -->
+    <canvas
+      id="particle-canvas"
+      class="fixed inset-0 pointer-events-none z-[-1]"
+    ></canvas>
+
+    <!-- Navbar -->
+    <nav
+      class="bg-black/80 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50"
+    >
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+          <!-- Logo -->
+          <div class="flex-shrink-0 flex items-center cursor-pointer">
+            <img
+              src="gg.png"
+              alt="GGhub Logo"
+              class="w-16 h-16 object-contain"
+            />
+            <span class="font-black text-4xl tracking-wider"
+              >GG<span class="text-yellow-500">hub</span></span
+            >
+          </div>
+
+          <!-- Desktop Menu -->
+          <div class="hidden md:flex items-center gap-8">
+            <a
+              href="category.html?game=pubg"
+              class="text-gray-300 hover:text-white transition font-bold flex items-center gap-2"
+            >
+              <img src="pubg.png" alt="PUBG" class="w-6 h-6 object-contain" />
+              Pubg Mobile
+            </a>
+            <a
+              href="category.html?game=overwatch"
+              class="text-gray-300 hover:text-white transition font-bold flex items-center gap-2"
+            >
+              <img
+                src="overwatch.png"
+                alt="Overwatch"
+                class="w-6 h-6 object-contain"
+              />
+              OVER WATCH 2
+            </a>
+            <a
+              href="category.html?game=marvel"
+              class="text-gray-300 hover:text-white transition font-bold flex items-center gap-2"
+            >
+              <img
+                src="marvel.png"
+                alt="marvel"
+                class="w-6 h-6 object-contain"
+              />
+              MARVEL RIVALS
+            </a>
+            <a
+              href="category.html?game=valorant"
+              class="text-gray-300 hover:text-white transition font-bold flex items-center gap-2"
+            >
+              <img
+                src="valorant.png"
+                alt="Valorant"
+                class="w-6 h-6 object-contain"
+              />
+              VALORANT
+            </a>
+          </div>
+
+          <!-- Search, Cart, User -->
+          <div class="hidden md:flex items-center gap-6">
+            <div class="relative">
+              <input
+                type="text"
+                placeholder="ابحث عن لعبة..."
+                class="bg-gray-800 text-sm text-white rounded-full pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 w-64 transition-all"
+              />
+              <i
+                class="fas fa-search absolute right-3 top-2.5 text-gray-400"
+              ></i>
+            </div>
+
+            <button
+              id="cart-btn"
+              class="relative text-gray-300 hover:text-white transition"
+            >
+              <i class="fas fa-shopping-cart text-xl"></i>
+              <span
+                id="cart-badge"
+                class="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                >0</span
+              >
+            </button>
+
+            <button
+              id="user-btn"
+              class="text-gray-300 hover:text-white transition"
+            >
+              <i class="fas fa-user-circle text-2xl"></i>
+            </button>
+          </div>
+
+          <!-- Mobile menu button -->
+          <div class="md:hidden flex items-center gap-4">
+            <button id="mobile-cart-btn" class="relative text-gray-300">
+              <i class="fas fa-shopping-cart text-xl"></i>
+              <span
+                id="mobile-cart-badge"
+                class="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                >0</span
+              >
+            </button>
+            <button
+              id="mobile-menu-btn"
+              class="text-gray-300 hover:text-white focus:outline-none"
+            >
+              <i class="fas fa-bars text-2xl"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Panel (Hidden by default) -->
+      <div
+        id="mobile-menu"
+        class="hidden md:hidden bg-gray-800 border-t border-gray-700"
+      >
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <a
+            href="#"
+            class="block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-900"
+            >الرئيسية</a
+          >
+          <a
+            href="#"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+            >ألعاب PC</a
+          >
+          <a
+            href="#"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+            >كونسول</a
+          >
+          <a
+            href="#"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
+            >العروض</a
+          >
+        </div>
+        <div class="p-4 border-t border-gray-700">
+          <input
+            type="text"
+            placeholder="ابحث عن لعبة..."
+            class="w-full bg-gray-900 text-white rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div
+      class="relative w-full h-[70vh] flex items-center justify-center overflow-hidden"
+    >
+      <!-- Background Slider -->
+      <div id="hero-slider" class="absolute inset-0 w-full h-full">
+        <img
+          src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+          alt="PUBGM"
+          class="hero-slide absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out translate-x-0 opacity-100 z-10"
+        />
+        <img
+          src="https://i.postimg.cc/5trgKjSw/reinhardt-overwatch-2-3840x2160-13030.jpg"
+          alt="OverWatch"
+          class="hero-slide absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out -translate-x-full opacity-0 z-0"
+        />
+        <img
+          src="https://i.postimg.cc/nzYsjPrv/marvel-rivals-key-3840x2160-16076.jpg"
+          alt="Marvel"
+          class="hero-slide absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out -translate-x-full opacity-0 z-0"
+        />
+        <img
+          src="https://i.postimg.cc/cHZCSBhW/call-of-duty-black-3840x2160-19463.jpg"
+          alt="Call of duty"
+          class="hero-slide absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out -translate-x-full opacity-0 z-0"
+        />
+        <img
+          src="https://i.postimg.cc/0Q2JsY0n/valorant-reyna-jett-omen-phoenix-sova-sage-breachrant-3840x2160-7475.jpg"
+          alt="Valorant"
+          class="hero-slide absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out -translate-x-full opacity-0 z-0"
+        />
+        <img
+          src="ov2.jpg"
+          alt="Over Watch"
+          class="hero-slide absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out -translate-x-full opacity-0 z-0"
+        />
+
+        <!-- Gradient Overlay (الطبقة الشفافة السوداء فوق الصور) -->
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40 z-20 pointer-events-none"
+        ></div>
+      </div>
+    </div>
+    <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+      <h1
+        class="text-4xl md:text-6xl font-black mb-6 leading-tight text-center"
+      >
+        ارتقِ بمستوى لعبك مع <br />
+        <div class="flex-shrink-0 flex items-center justify-center mt-2">
+          <img src="gg.png" alt="GGhub Logo" class="w-24 h-24 object-contain" />
+          <span class="font-black text-6xl tracking-wider">
+            GG<span class="text-yellow-500">hub</span>
+          </span>
+        </div>
+      </h1>
+      <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+        اكتشف ألعاب لأجهزة الكمبيوتر بأسعار لا تقبل المنافسة. ابدأ مغامرتك
+        القادمة الآن.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <!-- <button
+          class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105 shadow-lg shadow-purple-600/30"
+        >
+          تصفح المتجر <i class="fas fa-arrow-left mr-2"></i>
+        </button>
+        <button
+          class="bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-bold py-3 px-8 rounded-full transition-all"
+        >
+          عرض التخفيضات
+        </button> -->
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-16">
+      <!-- Categories -->
+      <!-- <section class="mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold border-r-4 border-purple-500 pr-4">التصنيفات</h2>
+            </div>
+            <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                <button class="flex-shrink-0 bg-purple-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-600/20">الكل</button>
+                <button class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-6 py-3 rounded-xl font-bold transition">أكشن</button>
+                <button class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-6 py-3 rounded-xl font-bold transition">مغامرات (RPG)</button>
+                <button class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-6 py-3 rounded-xl font-bold transition">رياضة</button>
+                <button class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-6 py-3 rounded-xl font-bold transition">رعب</button>
+                <button class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 text-gray-300 px-6 py-3 rounded-xl font-bold transition">استراتيجية</button>
+            </div>
+        </section> -->
+
+      <!-- Trending Games -->
+      <section class="mb-10">
+        <div class="flex items-center justify-between mt-10 mb-8">
+          <h2
+            class="text-2xl md:text-3xl font-bold border-r-4 border-yellow-500 pr-4 mt-10 mb-10"
+          >
+            الأكثر مبيعاً هذا الأسبوع
+          </h2>
+          <!-- <a
+            href="#"
+            class="text-purple-400 hover:text-purple-300 text-sm font-bold flex items-center gap-1"
+            >عرض الكل <i class="fas fa-chevron-left text-xs"></i
+          ></a> -->
+        </div>
+
+        <!-- Games Grid -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          id="games-grid"
+        >
+          <!-- Bratva day -->
+          <a
+            href="game-details.html?id=bratva_day"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="Bratva"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Bratva VIP 1 Day
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">Pubg Mobile</p> -->
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <!-- <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$4.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$2.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Bratva Week -->
+          <a
+            href="game-details.html?id=bratva_week"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="Bratva"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Bratva VIP 1 Week
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$9.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$5.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- bratva month -->
+
+          <a
+            href="game-details.html?id=bratva_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="Bratva"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Bratva VIP 1 Month
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$39.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- dragon day -->
+          <a
+            href="game-details.html?id=dragon_day"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="dragon"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Dragon VIP 1 Day
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$4.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$2.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- dragon Week -->
+          <a
+            href="game-details.html?id=dragon_week"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="dragon"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Dragon VIP 1 Week
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$9.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$5.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- dragon month -->
+
+          <a
+            href="game-details.html?id=dragon_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="dragon"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Dragon VIP 1 Month
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$39.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- sauron day -->
+          <a
+            href="game-details.html?id=sauron_day"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="sauron"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Sauron VIP 1 Day
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$4.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$2.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- sauron Week -->
+          <a
+            href="game-details.html?id=sauron_week"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="sauron"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Sauron VIP 1 Week
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$9.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$5.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- sauron month -->
+
+          <a
+            href="game-details.html?id=sauron_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="sauron"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Sauron VIP 1 Month
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$39.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Hanzo -->
+          <a
+            href="game-details.html?id=hanzo_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/0Q2JsY0n/valorant-reyna-jett-omen-phoenix-sova-sage-breachrant-3840x2160-7475.jpg"
+                alt="Valorant"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                جديد
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Hanzo V₂ 1 Month
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">Valorant</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="valorant.png"
+                alt="Valorant"
+                class="h-10 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Product Card 4 -->
+
+          <div
+            href="#"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/cHZCSBhW/call-of-duty-black-3840x2160-19463.jpg"
+                alt="Call Of Duty"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                Sold Out
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">GHOST</h3>
+              </div>
+              <p class="text-gray-400 text-sm mb-4">Call of duty</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div>
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-xl font-bold text-yellow-500">$39.99</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BUBG MOBILE -->
+      <section class="mb-10">
+        <div class="flex items-center justify-between mt-10 mb-8">
+          <h2
+            class="text-2xl md:text-3xl font-bold border-r-4 border-yellow-500 pr-4 mt-10 mb-10"
+          >
+            PUBG MOBILE
+          </h2>
+        </div>
+
+        <!-- Games Grid -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          id="games-grid"
+        >
+          <!-- Bratva day -->
+          <a
+            href="game-details.html?id=bratva_day"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="Bratva"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Bratva VIP 1 Day
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$4.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$2.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Bratva Week -->
+          <a
+            href="game-details.html?id=bratva_week"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="Bratva"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Bratva VIP 1 Week
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$9.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$5.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- bratva month -->
+
+          <a
+            href="game-details.html?id=bratva_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="Bratva"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Bratva VIP 1 Month
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$39.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- dragon day -->
+          <a
+            href="game-details.html?id=dragon_day"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="dragon"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Dragon VIP 1 Day
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$4.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$2.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- dragon Week -->
+          <a
+            href="game-details.html?id=dragon_week"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="dragon"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Dragon VIP 1 Week
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$9.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$5.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- dragon month -->
+
+          <a
+            href="game-details.html?id=dragon_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="dragon"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Dragon VIP 1 Month
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$39.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- sauron day -->
+          <a
+            href="game-details.html?id=sauron_day"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="sauron"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Sauron VIP 1 Day
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$4.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$2.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- sauron Week -->
+          <a
+            href="game-details.html?id=sauron_week"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="sauron"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Sauron VIP 1 Week
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$9.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$5.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- sauron month -->
+
+          <a
+            href="game-details.html?id=sauron_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg"
+                alt="sauron"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Sauron VIP 1 Month
+                </h3>
+              </div>
+              <img
+                src="pubg.png"
+                alt="Pubg Mobile"
+                class="h-12 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$39.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Over Watch2  -->
+      <section class="mb-10">
+        <div class="flex items-center justify-between mt-10 mb-8">
+          <h2
+            class="text-2xl md:text-3xl font-bold border-r-4 border-yellow-500 pr-4 mt-10 mb-10"
+          >
+            OVER WATCH 2
+          </h2>
+        </div>
+
+        <!-- Games Grid -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          id="games-grid"
+        >
+          <!-- Netflix day -->
+          <a
+            href="game-details.html?id=netflix_day"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="ov2.jpg
+"
+                alt="Netflix"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Netflix 1 Day
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">Over Watch2</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="overwatch.png"
+                alt="Over watch"
+                class="h-12 w-auto mb-1 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$4.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$2.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Netflix Week -->
+          <a
+            href="game-details.html?id=netflix_week"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="ov2.jpg
+"
+                alt="Netflix"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Netflix 1 Week
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">Over Watch2</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="overwatch.png"
+                alt="Over Watch"
+                class="h-12 w-auto mb-1 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$9.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$5.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Netflix month -->
+
+          <a
+            href="game-details.html?id=netflix_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="ov2.jpg
+"
+                alt="Netflix"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Netflix 1 Month
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">Over Watch2</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="overwatch.png"
+                alt="Over Watch"
+                class="h-12 w-auto mb-1 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$39.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Marvel Rivals  -->
+      <section class="mb-10">
+        <div class="flex items-center justify-between mt-10 mb-8">
+          <h2
+            class="text-2xl md:text-3xl font-bold border-r-4 border-yellow-500 pr-4 mt-10 mb-10"
+          >
+            MARVEL RIVALS
+          </h2>
+        </div>
+
+        <!-- Games Grid -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          id="games-grid"
+        >
+          <!-- spider day -->
+          <a
+            href="game-details.html?id=spider_day"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/QNgTzHXY/fantastic-four-3840x2160-21136.jpg
+"
+                alt="spider"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Spider 1 Day
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">Marvel Rivals</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="marvel.png"
+                alt="Marvel"
+                class="h-12 w-auto mb-1 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$4.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$2.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- spider Week -->
+          <a
+            href="game-details.html?id=spider_week"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/QNgTzHXY/fantastic-four-3840x2160-21136.jpg
+"
+                alt="spider"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Spider 1 Week
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">Marvel Rivals</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="marvel.png"
+                alt="Marvel"
+                class="h-12 w-auto mb-1 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$9.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$5.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- spider month -->
+
+          <a
+            href="game-details.html?id=spider_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/QNgTzHXY/fantastic-four-3840x2160-21136.jpg
+"
+                alt="spider"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Spider 1 Month
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">Marvel Rivals</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="marvel.png"
+                alt="Marvel"
+                class="h-12 w-auto mb-1 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$39.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Valorant -->
+      <section class="mb-16">
+        <div class="flex items-center justify-between mt-10 mb-8">
+          <h2
+            class="text-2xl md:text-3xl font-bold border-r-4 border-yellow-500 pr-4 mt-10 mb-10"
+          >
+            VALORANT
+          </h2>
+        </div>
+
+        <!-- Games Grid -->
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          id="games-grid"
+        >
+          <!-- Hanzo day -->
+          <a
+            href="game-details.html?id=hanzo_day"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/0Q2JsY0n/valorant-reyna-jett-omen-phoenix-sova-sage-breachrant-3840x2160-7475.jpg"
+                alt="Hanzo"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Hanzo V₂ 1 Day
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">valorant</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="valorant.png"
+                alt="Valorant"
+                class="h-10 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$4.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$2.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Hanzo Week -->
+          <a
+            href="game-details.html?id=hanzo_week"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/0Q2JsY0n/valorant-reyna-jett-omen-phoenix-sova-sage-breachrant-3840x2160-7475.jpg"
+                alt="Hanzo"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Hanzo V₂ 1 Week
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">valorant</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="valorant.png"
+                alt="Valorant"
+                class="h-10 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$9.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$5.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Hanzo month -->
+
+          <a
+            href="game-details.html?id=hanzo_month"
+            class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all group block cursor-pointer"
+          >
+            <div class="relative h-56 overflow-hidden">
+              <img
+                src="https://i.postimg.cc/0Q2JsY0n/valorant-reyna-jett-omen-phoenix-sova-sage-breachrant-3840x2160-7475.jpg"
+                alt="Hanzo"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div
+                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded"
+              >
+                offer
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg text-white line-clamp-1">
+                  Hanzo V₂ 1 Month
+                </h3>
+              </div>
+              <!-- <p class="text-gray-400 text-sm mb-4">valorant</p>
+              <div class="flex gap-2 text-gray-500 text-sm mb-4">
+                <i
+                  class="fab fa-windows hover:text-white transition cursor-pointer"
+                ></i>
+              </div> -->
+              <img
+                src="valorant.png"
+                alt="Valorant"
+                class="h-10 w-auto mb-4 object-contain"
+              />
+              <div class="flex items-center justify-between mt-auto">
+                <div class="flex flex-col">
+                  <span class="text-gray-500 line-through text-xs">$39.99</span>
+                  <span class="text-xl font-bold text-yellow-500">$29.99</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Features Banner -->
+      <section
+        class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl border border-gray-700 p-8 my-16"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div class="flex flex-col items-center">
+            <div
+              class="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mb-4 text-purple-400 text-2xl"
+            >
+              <i class="fas fa-bolt"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">تسليم فوري</h3>
+            <p class="text-gray-400 text-sm">
+              احصل على كود اللعبة فور إتمام عملية الدفع مباشرة.
+            </p>
+          </div>
+          <div class="flex flex-col items-center">
+            <div
+              class="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mb-4 text-yellow-400 text-2xl"
+            >
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">دفع آمن 100%</h3>
+            <p class="text-gray-400 text-sm">
+              طرق دفع متعددة ومشفرة بالكامل لضمان حمايتك.
+            </p>
+          </div>
+          <div class="flex flex-col items-center">
+            <div
+              class="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-4 text-blue-400 text-2xl"
+            >
+              <i class="fas fa-headset"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">دعم فني 24/7</h3>
+            <p class="text-gray-400 text-sm">
+              فريق الدعم متواجد على مدار الساعة لحل أي مشكلة.
+            </p>
+          </div>
+        </div>
+
+        <!-- إحصائيات حية وهمية -->
+        <div class="mt-12 pt-12 border-t border-gray-700/50">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div
+              class="flex flex-col items-center justify-center p-4 bg-gray-800/30 rounded-2xl border border-gray-700/30"
+            >
+              <span
+                class="text-4xl font-black text-purple-400 mb-2 flex items-center gap-2"
+              >
+                <i class="fas fa-users text-2xl text-purple-500/50"></i>
+                <span id="stat-active">845</span>
+              </span>
+              <span class="text-gray-400 font-bold">يتصفحون المتجر الآن</span>
+            </div>
+            <div
+              class="flex flex-col items-center justify-center p-4 bg-gray-800/30 rounded-2xl border border-gray-700/30"
+            >
+              <span
+                class="text-4xl font-black text-yellow-400 mb-2 flex items-center gap-2"
+              >
+                <i class="fas fa-shopping-bag text-2xl text-yellow-500/50"></i>
+                <span id="stat-sales">+120</span>
+              </span>
+              <span class="text-gray-400 font-bold"
+                >عملية شراء ناجحة يومياً</span
+              >
+            </div>
+            <div
+              class="flex flex-col items-center justify-center p-4 bg-gray-800/30 rounded-2xl border border-gray-700/30"
+            >
+              <span
+                class="text-4xl font-black text-blue-400 mb-2 flex items-center gap-2"
+              >
+                <i class="fas fa-gamepad text-2xl text-blue-500/50"></i>
+                <span>+5,000</span>
+              </span>
+              <span class="text-gray-400 font-bold">عملية شراء ناجحة</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black pt-16 pb-8 border-t border-gray-800" dir="rtl">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-12">
+          <div class="lg:col-span-6">
+            <div class="flex items-center mb-6">
+              <img
+                src="gg.png"
+                alt="GGhub Logo"
+                class="w-12 h-12 object-contain"
+              />
+              <span class="font-black text-3xl tracking-wider text-white">
+                GG<span class="text-yellow-500">hub</span>
+              </span>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed mb-6 max-w-xl">
+              متجرك الأول والوحيد لكل ما يخص عالم الألعاب. أحدث الإصدارات، أفضل
+              الأسعار، مجتمع لاعبين حقيقي.
+            </p>
+            <div class="flex gap-4">
+              <a
+                href="#"
+                class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-purple-600 hover:text-white transition duration-300 shadow-lg"
+              >
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a
+                href="#"
+                class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-purple-600 hover:text-white transition duration-300 shadow-lg"
+              >
+                <i class="fab fa-discord"></i>
+              </a>
+              <a
+                href="#"
+                class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-purple-600 hover:text-white transition duration-300 shadow-lg"
+              >
+                <i class="fab fa-instagram"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 flex lg:justify-end">
+            <div class="w-full lg:w-auto">
+              <h4
+                class="text-white font-bold text-lg mb-6 relative inline-block pb-2 border-b-2 border-yellow-500"
+              >
+                المساعدة والدعم
+              </h4>
+              <ul class="space-y-4">
+                <li>
+                  <a
+                    href="faq.html"
+                    class="text-gray-400 hover:text-yellow-500 transition duration-300 text-sm flex items-center gap-2"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                    الأسئلة الشائعة
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="payment-methods.html"
+                    class="text-gray-400 hover:text-yellow-500 transition duration-300 text-sm flex items-center gap-2"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                    طرق الدفع
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="refund-policy.html"
+                    class="text-gray-400 hover:text-yellow-500 transition duration-300 text-sm flex items-center gap-2"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                    سياسة الاسترجاع
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="text-gray-400 hover:text-yellow-500 transition duration-300 text-sm flex items-center gap-2"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                    اتصل بنا
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="border-t border-gray-800 pt-8 flex flex-col-reverse md:flex-row items-center justify-between gap-6 text-sm text-gray-500"
+        >
+          <p class="text-center md:text-right">
+            &copy; 2024 متجر GGhub. جميع الحقوق محفوظة.
+          </p>
+          <div class="flex gap-4 items-center" dir="ltr">
+            <i
+              class="fab fa-cc-visa text-3xl hover:text-white transition cursor-pointer"
+            ></i>
+            <i
+              class="fab fa-cc-mastercard text-3xl hover:text-white transition cursor-pointer"
+            ></i>
+            <i
+              class="fab fa-cc-paypal text-3xl hover:text-white transition cursor-pointer"
+            ></i>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div
+      id="toast-container"
+      class="fixed bottom-5 left-5 z-50 flex flex-col gap-3 pointer-events-none"
+    ></div>
+    <div
+      id="auth-modal"
+      class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 backdrop-blur-sm pointer-events-none"
+    >
+      <div
+        class="bg-[#0a0a0a] border border-gray-800 rounded-2xl w-11/12 max-w-md p-6 transform scale-95 transition-transform duration-300 pointer-events-auto shadow-[0_0_40px_rgba(139,92,246,0.15)]"
+        id="auth-modal-content"
+      >
+        <div
+          class="flex justify-between items-center border-b border-gray-800 pb-4 mb-6"
+        >
+          <h2 class="text-2xl font-bold text-white" id="auth-title">
+            تسجيل الدخول
+          </h2>
+          <button
+            id="close-auth-btn"
+            class="text-gray-400 hover:text-white transition bg-gray-800 hover:bg-red-500 w-8 h-8 rounded-full flex items-center justify-center"
+          >
+            <i class="fas fa-times text-sm"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-gray-400 text-sm font-bold mb-2"
+              >البريد الإلكتروني</label
+            >
+            <input
+              type="email"
+              id="auth-email"
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition"
+              placeholder="example@mail.com"
+            />
+          </div>
+          <div>
+            <label class="block text-gray-400 text-sm font-bold mb-2"
+              >كلمة المرور</label
+            >
+            <input
+              type="password"
+              id="auth-password"
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition"
+              placeholder="********"
+            />
+          </div>
+          <div id="confirm-password-container" class="hidden mt-4">
+            <label class="block text-gray-400 text-sm font-bold mb-2"
+              >تأكيد كلمة المرور</label
+            >
+            <input
+              type="password"
+              id="auth-confirm-password"
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500 transition"
+              placeholder="********"
+            />
+          </div>
+
+          <button
+            id="auth-submit-btn"
+            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl transition-all mt-4"
+          >
+            دخول
+          </button>
+
+          <div class="text-center mt-4">
+            <button
+              id="toggle-auth-mode"
+              class="text-gray-400 hover:text-yellow-500 text-sm transition"
+            >
+              ليس لديك حساب؟ إنشاء حساب جديد
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      id="cart-modal"
+      class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 backdrop-blur-sm pointer-events-none"
+    >
+      <div
+        class="bg-[#0a0a0a] border border-gray-800 rounded-2xl w-11/12 max-w-lg p-6 transform scale-95 transition-transform duration-300 pointer-events-auto shadow-[0_0_40px_rgba(139,92,246,0.15)]"
+        id="cart-modal-content"
+      >
+        <div
+          class="flex justify-between items-center border-b border-gray-800 pb-4 mb-4"
+        >
+          <h2 class="text-2xl font-bold text-white">
+            <i class="fas fa-shopping-cart text-yellow-500 ml-2"></i> سلة
+            المشتريات
+          </h2>
+          <button
+            id="close-cart-btn"
+            class="text-gray-400 hover:text-white transition bg-gray-800 hover:bg-red-500 w-8 h-8 rounded-full flex items-center justify-center"
+          >
+            <i class="fas fa-times text-sm"></i>
+          </button>
+        </div>
+
+        <div
+          id="cart-items-container"
+          class="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar"
+        >
+          <p class="text-gray-500 text-center py-6">السلة فارغة حالياً</p>
+        </div>
+
+        <div class="border-t border-gray-800 mt-4 pt-4">
+          <div class="flex justify-between items-center mb-6">
+            <span class="text-gray-400 font-bold">الإجمالي:</span>
+            <span
+              id="cart-total"
+              class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200"
+              >$0.00</span
+            >
+          </div>
+          <div class="mb-6">
+            <p class="text-gray-400 text-sm font-bold mb-3">
+              اختر وسيلة الدفع:
+            </p>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="cursor-pointer">
+                <input
+                  type="radio"
+                  name="payment-method"
+                  value="paymob"
+                  class="hidden peer"
+                  checked
+                />
+                <div
+                  class="border border-gray-700 rounded-xl p-3 flex flex-col items-center gap-2 peer-checked:border-purple-500 peer-checked:bg-purple-500/10 transition"
+                >
+                  <i class="fas fa-credit-card text-xl text-blue-400"></i>
+                  <span class="text-xs font-bold text-white"
+                    >بطاقة / محفظة</span
+                  >
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input
+                  type="radio"
+                  name="payment-method"
+                  value="crypto"
+                  class="hidden peer"
+                />
+                <div
+                  class="border border-gray-700 rounded-xl p-3 flex flex-col items-center gap-2 peer-checked:border-yellow-500 peer-checked:bg-yellow-500/10 transition"
+                >
+                  <i class="fab fa-bitcoin text-xl text-yellow-500"></i>
+                  <span class="text-xs font-bold text-white">Crypto</span>
+                </div>
+              </label>
+            </div>
+          </div>
+          <button
+            id="checkout-btn"
+            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2"
+          >
+            إتمام الطلب والدفع <i class="fas fa-lock"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      id="guest-modal"
+      class="fixed inset-0 bg-black/80 z-[110] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 backdrop-blur-sm pointer-events-none"
+    >
+      <div
+        class="bg-[#0a0a0a] border border-gray-800 rounded-2xl w-11/12 max-w-md p-8 transform scale-95 transition-transform duration-300 pointer-events-auto shadow-[0_0_50px_rgba(139,92,246,0.2)]"
+      >
+        <div class="text-center mb-6">
+          <div
+            class="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-500 text-2xl"
+          >
+            <i class="fas fa-user-secret"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white mb-2">إتمام الطلب كزائر</h2>
+          <p class="text-gray-400 text-sm">
+            أدخل بريدك الإلكتروني لنتمكن من إرسال مفتاح اللعبة إليك بعد الدفع.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <input
+            type="email"
+            id="guest-field-email"
+            class="w-full bg-gray-900 text-white border border-gray-700 rounded-xl px-4 py-4 focus:outline-none focus:border-purple-500 transition-all placeholder:text-gray-600"
+            placeholder="example@mail.com"
+          />
+
+          <div class="flex gap-3">
+            <button
+              id="cancel-guest-btn"
+              class="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 rounded-xl transition-all"
+            >
+              إلغاء
+            </button>
+            <button
+              id="confirm-guest-btn"
+              class="flex-[2] bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-purple-600/20"
+            >
+              متابعة الدفع
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Scripts -->
+    <script>
+      // ==========================================
+      // --- إعدادات وتوصيل قاعدة بيانات Supabase ---
+      // ==========================================
+
+      const supabaseUrl = "https://tmwgcggwuzwlfaalnazm.supabase.co";
+      const supabaseKey = "sb_publishable_1wLvvdMqd-H1PuROGYOllw_vEj2_pr2";
+
+      // تهيئة الاتصال
+      const supabaseClient = window.supabase.createClient(
+        supabaseUrl,
+        supabaseKey,
+      );
+
+      // --- Mobile Menu Toggle ---
+      const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+      const mobileMenu = document.getElementById("mobile-menu");
+
+      mobileMenuBtn.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+
+      // --- Cart Logic ---
+      let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
+      const cartModal = document.getElementById("cart-modal");
+      const closeCartBtn = document.getElementById("close-cart-btn");
+      let cartCount = cartItems.length;
+      const cartBadgeDesktop = document.getElementById("cart-badge");
+      const cartBadgeMobile = document.getElementById("mobile-cart-badge");
+      const toastContainer = document.getElementById("toast-container");
+      updateCartUI();
+
+      function addToCart(gameName, price) {
+        cartItems.push({ name: gameName, price: price });
+        cartCount = cartItems.length;
+        updateCartUI();
+        showToast(
+          `تمت إضافة <b>${gameName}</b> إلى السلة بسعر <b>$${price}</b> بنجاح!`,
+        );
+      }
+
+      function updateCartUI() {
+        cartCount = cartItems.length;
+        // 1. تحديث الأرقام على الأيقونات
+        [cartBadgeDesktop, cartBadgeMobile].forEach((badge) => {
+          if (badge) {
+            badge.textContent = cartCount;
+            badge.classList.add("scale-125");
+            setTimeout(() => badge.classList.remove("scale-125"), 200);
+          }
+        });
+
+        // 2. تحديث محتوى السلة الداخلي
+        const container = document.getElementById("cart-items-container");
+        const totalEl = document.getElementById("cart-total");
+
+        if (cartItems.length === 0) {
+          container.innerHTML =
+            '<p class="text-gray-500 text-center py-6">السلة فارغة حالياً</p>';
+          totalEl.innerText = "$0.00";
+          return;
+        }
+
+        container.innerHTML = "";
+        let total = 0;
+
+        cartItems.forEach((item, index) => {
+          total += parseFloat(item.price) || 0;
+          container.innerHTML += `
+                <div class="flex justify-between items-center bg-gray-800/50 p-4 rounded-xl border border-gray-700 hover:border-gray-600 transition">
+                    <span class="text-white text-sm font-bold line-clamp-1">${item.name}</span>
+                    <div class="flex items-center gap-4">
+                        <span class="text-yellow-400 font-bold">$${item.price}</span>
+                        <button onclick="removeFromCart(${index})" class="text-gray-500 hover:text-red-500 transition">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        totalEl.innerText = `$${total.toFixed(2)}`;
+        localStorage.setItem("cart", JSON.stringify(cartItems));
+      }
+
+      function removeFromCart(index) {
+        cartItems.splice(index, 1);
+        cartCount = cartItems.length;
+        updateCartUI();
+      }
+
+      function openCart() {
+        cartModal.classList.remove("hidden");
+        setTimeout(() => {
+          cartModal.classList.remove("opacity-0");
+          document
+            .getElementById("cart-modal-content")
+            .classList.remove("scale-95");
+        }, 10);
+      }
+
+      function closeCart() {
+        cartModal.classList.add("opacity-0");
+        document.getElementById("cart-modal-content").classList.add("scale-95");
+        setTimeout(() => {
+          cartModal.classList.add("hidden");
+        }, 300);
+      }
+
+      // تفعيل الضغط على الأزرار لفتح وقفل السلة
+      const cartBtnDesktop = document.getElementById("cart-btn");
+      const cartBtnMobile = document.getElementById("mobile-cart-btn");
+
+      if (cartBtnDesktop) cartBtnDesktop.addEventListener("click", openCart);
+      if (cartBtnMobile) cartBtnMobile.addEventListener("click", openCart);
+      if (closeCartBtn) closeCartBtn.addEventListener("click", closeCart);
+
+      const authModal = document.getElementById("auth-modal");
+      const closeAuthBtn = document.getElementById("close-auth-btn");
+      const userBtn = document.getElementById("user-btn");
+
+      function openAuth() {
+        authModal.classList.remove("hidden");
+        setTimeout(() => {
+          authModal.classList.remove("opacity-0");
+          document
+            .getElementById("auth-modal-content")
+            .classList.remove("scale-95");
+        }, 10);
+      }
+
+      function closeAuth() {
+        authModal.classList.add("opacity-0");
+        document.getElementById("auth-modal-content").classList.add("scale-95");
+        setTimeout(() => {
+          authModal.classList.add("hidden");
+        }, 300);
+      }
+
+      if (userBtn) userBtn.addEventListener("click", openAuth);
+      if (closeAuthBtn) closeAuthBtn.addEventListener("click", closeAuth);
+
+      authModal.addEventListener("click", (e) => {
+        if (e.target === authModal) closeAuth();
+      });
+
+      // --- برمجة التبديل بين الدخول وإنشاء الحساب ---
+      const authTitle = document.getElementById("auth-title");
+      const authSubmitBtn = document.getElementById("auth-submit-btn");
+      const toggleAuthModeBtn = document.getElementById("toggle-auth-mode");
+      const confirmPassContainer = document.getElementById(
+        "confirm-password-container",
+      );
+
+      // متغير بيحفظ إحنا في أي وضع حالياً (دخول ولا تسجيل)
+      let isLoginMode = true;
+
+      if (toggleAuthModeBtn) {
+        toggleAuthModeBtn.addEventListener("click", () => {
+          isLoginMode = !isLoginMode; // عكس الحالة
+
+          if (isLoginMode) {
+            // وضع تسجيل الدخول
+            authTitle.innerText = "تسجيل الدخول";
+            authSubmitBtn.innerText = "دخول";
+            toggleAuthModeBtn.innerText = "ليس لديك حساب؟ إنشاء حساب جديد";
+            confirmPassContainer.classList.add("hidden"); // إخفاء الحقل
+          } else {
+            // وضع إنشاء حساب جديد
+            authTitle.innerText = "إنشاء حساب جديد";
+            authSubmitBtn.innerText = "تسجيل حساب";
+            toggleAuthModeBtn.innerText = "لديك حساب بالفعل؟ تسجيل الدخول";
+            confirmPassContainer.classList.remove("hidden"); // إظهار الحقل
+          }
+        });
+      }
+      if (authSubmitBtn) {
+        authSubmitBtn.addEventListener("click", async () => {
+          const email = document.getElementById("auth-email").value;
+          const password = document.getElementById("auth-password").value;
+
+          if (!email || !password) {
+            showToast("برجاء إدخال البريد الإلكتروني وكلمة المرور", true);
+            return;
+          }
+
+          if (!isLoginMode) {
+            const confirmPassword = document.getElementById(
+              "auth-confirm-password",
+            ).value;
+            if (password !== confirmPassword) {
+              showToast("كلمتا المرور غير متطابقتين!", true);
+              return;
+            }
+          }
+
+          // showToast("جاري الاتصال بالسيرفر...", false);
+
+          try {
+            if (isLoginMode) {
+              const { data, error } =
+                await supabaseClient.auth.signInWithPassword({
+                  email,
+                  password,
+                });
+              if (error) throw error;
+              showToast("تم تسجيل الدخول بنجاح!", false);
+              closeAuth();
+            } else {
+              const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+              });
+              if (error) throw error;
+              showToast("تم إنشاء الحساب! راجع بريدك لتأكيده.", false);
+              closeAuth();
+            }
+          } catch (error) {
+            showToast("خطأ: " + (error.message || "تأكد من البيانات"), true);
+          }
+        });
+      }
+
+      // --- تحديث واجهة المستخدم بناءً على حالة تسجيل الدخول ---
+      function updateAuthUI(user) {
+        const userBtn = document.getElementById("user-btn");
+        if (!userBtn) return;
+
+        if (user) {
+          // لو المستخدم مسجل دخول: غير الأيقونة لزرار خروج وخلي لونها أحمر خفيف
+          userBtn.innerHTML = `<i class="fas fa-sign-out-alt text-2xl text-red-400 hover:text-red-500 transition"></i>`;
+          userBtn.title = "تسجيل الخروج (" + user.email + ")";
+
+          // تغيير وظيفة الزرار عند الضغط عليه ليكون "خروج" بدلاً من فتح النافذة
+          userBtn.onclick = async () => {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+              showToast("خطأ أثناء تسجيل الخروج", true);
+            } else {
+              showToast("تم تسجيل الخروج بنجاح", false);
+            }
+          };
+        } else {
+          // لو مش مسجل دخول: ارجع للشكل الأصلي ووظيفة فتح النافذة
+          userBtn.innerHTML = `<i class="fas fa-user-circle text-2xl"></i>`;
+          userBtn.title = "تسجيل الدخول / إنشاء حساب";
+          userBtn.onclick = openAuth;
+        }
+      }
+
+      // الاستماع لتغييرات حالة تسجيل الدخول (دخول، خروج، تغيير كلمة سر، إلخ)
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        console.log("Auth Event:", event);
+        const user = session?.user || null;
+        updateAuthUI(user);
+      });
+
+      // قفل النافذة لو المستخدم ضغط بره المربع
+      cartModal.addEventListener("click", (e) => {
+        if (e.target === cartModal) {
+          closeCart();
+        }
+      });
+
+      function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className =
+          "bg-gray-800 border border-purple-500/50 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 toast-enter pointer-events-auto";
+
+        toast.innerHTML = `
+                <div class="bg-green-500/20 text-green-400 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="text-sm">${message}</div>
+            `;
+
+        toastContainer.appendChild(toast);
+
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+          toast.classList.remove("toast-enter");
+          toast.classList.add("toast-exit");
+          setTimeout(() => {
+            toast.remove();
+          }, 300); // Wait for exit animation
+        }, 3000);
+      }
+
+      // --- Golden Particles System ---
+      const canvas = document.getElementById("particle-canvas");
+      const ctx = canvas.getContext("2d");
+      let particlesArray = [];
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 0.5; // حجم الجزيئات
+          this.speedX = Math.random() * 0.5 - 0.25; // حركة يمين ويسار
+          this.speedY = Math.random() * 1.5 + 0.5; // سرعة الصعود لأعلى
+          this.alpha = Math.random() * 0.7 + 0.3; // الشفافية
+        }
+        update() {
+          this.x += this.speedX;
+          this.y -= this.speedY; // التحرك لأعلى
+
+          // عند ملامسة الأطراف الجانبية
+          if (this.x > canvas.width || this.x < 0) {
+            this.speedX = -this.speedX;
+          }
+          // عند الخروج من أعلى الشاشة تعود للأسفل
+          if (this.y < 0) {
+            this.y = canvas.height;
+            this.x = Math.random() * canvas.width;
+          }
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 215, 0, ${this.alpha})`; // اللون الذهبي
+          ctx.fill();
+        }
+      }
+
+      function initParticles() {
+        particlesArray = [];
+        // تقليل عدد الجزيئات قليلاً لتجنب البطء عند رسم الخطوط بينها
+        const numberOfParticles = Math.floor(
+          (canvas.width * canvas.height) / 12000,
+        );
+        for (let i = 0; i < numberOfParticles; i++) {
+          particlesArray.push(new Particle());
+        }
+      }
+
+      function connectParticles() {
+        let opacityValue = 1;
+        for (let a = 0; a < particlesArray.length; a++) {
+          for (let b = a; b < particlesArray.length; b++) {
+            let dx = particlesArray[a].x - particlesArray[b].x;
+            let dy = particlesArray[a].y - particlesArray[b].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            // رسم خط إذا كانت المسافة بين الجزيئين أقل من 130 بكسل
+            if (distance < 130) {
+              opacityValue = 1 - distance / 130;
+              ctx.strokeStyle = `rgba(255, 215, 0, ${opacityValue * 0.4})`; // خطوط ذهبية شفافة
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+              ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particlesArray.length; i++) {
+          particlesArray[i].update();
+          particlesArray[i].draw();
+        }
+        connectParticles(); // استدعاء وظيفة رسم الخطوط بين الجزيئات المتقاربة
+        requestAnimationFrame(animateParticles);
+      }
+
+      // --- Live Fake Stats Logic ---
+      let activeUsers = 845;
+      let todaySales = 120;
+      const activeStatEl = document.getElementById("stat-active");
+      const salesStatEl = document.getElementById("stat-sales");
+
+      // تحديث عدد المتصفحين كل 3 ثواني (تذبذب حول المتوسط 1200)
+      setInterval(() => {
+        // حساب المسافة بين الرقم الحالي والمتوسط (1200)
+        const diff = 800 - activeUsers;
+        // قوة جذب خفيفة لإعادة الرقم نحو 1200
+        const pullForce = Math.round(diff * 0.1);
+
+        // تغيير عشوائي متوازن بين -10 و +10
+        const randomChange = Math.floor(Math.random() * 21) - 10;
+
+        // تطبيق التغيير
+        activeUsers += randomChange + pullForce;
+
+        if (activeStatEl)
+          activeStatEl.innerText = activeUsers.toLocaleString("en-US");
+      }, 3000);
+
+      // تحديث عدد المبيعات ليكون أكثر واقعية (مبيعة واحدة كل فترة أطول)
+      // setInterval(() => {
+      //   // احتمالية 30% لزيادة مبيعة واحدة فقط كل 15 ثانية
+      //   const isSaleMade = Math.random() > 0.7;
+      //   if (isSaleMade) {
+      //     todaySales += 1;
+      //     if (salesStatEl) {
+      //       salesStatEl.innerText = todaySales.toLocaleString("en-US");
+      //       // إضافة تأثير نبض (Pulse) خفيف عند حدوث بيعة جديدة
+      //       salesStatEl.parentElement.classList.add(
+      //         "scale-110",
+      //         "text-yellow-300",
+      //       );
+      //       setTimeout(() => {
+      //         salesStatEl.parentElement.classList.remove(
+      //           "scale-110",
+      //           "text-yellow-300",
+      //         );
+      //         salesStatEl.parentElement.classList.add(
+      //           "transition-all",
+      //           "duration-300",
+      //         );
+      //       }, 300);
+      //     }
+      //   }
+      // }, 15000); // يفحص كل 15 ثانية
+
+      // --- Hero Image Slider Logic (من اليسار لليمين) ---
+      const heroSlides = document.querySelectorAll(".hero-slide");
+      let currentHeroSlide = 0;
+
+      setInterval(() => {
+        const currentEl = heroSlides[currentHeroSlide];
+
+        // تحديد الصورة القادمة
+        const nextHeroSlide = (currentHeroSlide + 1) % heroSlides.length;
+        const nextEl = heroSlides[nextHeroSlide];
+
+        // 1. تحريك الصورة الحالية إلى اليمين وإخفائها
+        currentEl.classList.remove("translate-x-0", "opacity-100", "z-10");
+        currentEl.classList.add("translate-x-full", "opacity-0", "z-0");
+
+        // 2. تجهيز الصورة الجديدة في جهة اليسار فوراً (بدون أنيميشن)
+        nextEl.style.transitionDuration = "0ms";
+        nextEl.classList.remove("translate-x-full", "translate-x-0");
+        nextEl.classList.add("-translate-x-full");
+
+        // إجبار المتصفح على تطبيق التغيير الفوري
+        void nextEl.offsetWidth;
+
+        // 3. تطبيق حركة الانزلاق لتدخل الصورة الجديدة للشاشة من اليسار لليمين
+        nextEl.style.transitionDuration = "1000ms";
+        nextEl.classList.remove("-translate-x-full", "opacity-0", "z-0");
+        nextEl.classList.add("translate-x-0", "opacity-100", "z-10");
+
+        // تحديث المؤشر
+        currentHeroSlide = nextHeroSlide;
+      }, 4000); // تغيير الصورة كل 4 ثواني
+
+      // تشغيل نظام الجزيئات والتجاوب مع تغيير حجم الشاشة
+      resizeCanvas();
+      initParticles();
+      animateParticles();
+
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        initParticles();
+      });
+
+      // دالة بسيطة لاختبار الاتصال
+      async function testConnection() {
+        console.log("جاري الاتصال بـ Supabase...");
+        // showToast("جاري الاتصال بالسيرفر...", false);
+      }
+
+      // استدعاء اختبار الاتصال
+      testConnection();
+
+      supabaseClient.auth.getUser().then(({ data: { user } }) => {
+        updateAuthUI(user);
+      });
+      // دالة موحدة لتسجيل الطلب في قاعدة البيانات
+      async function processOrder(uid, email) {
+        showToast("جاري تسجيل الطلب في قاعدة البيانات...", false);
+
+        // جلب وسيلة الدفع المختارة
+        const selectedMethod = document.querySelector(
+          'input[name="payment-method"]:checked',
+        ).value;
+
+        const orderData = {
+          user_id: uid, // سيكون null لو كان زائراً
+          customer_email: email,
+          payment_method: selectedMethod,
+          items: cartItems,
+          total_price: cartItems.reduce(
+            (sum, item) => sum + (parseFloat(item.price) || 0),
+            0,
+          ),
+          status: "pending",
+        };
+
+        try {
+          const { data, error } = await supabaseClient
+            .from("orders")
+            .insert([orderData])
+            .select();
+
+          if (error) throw error;
+
+          showToast("تم تسجيل طلبك بنجاح! رقم الطلب: " + data[0].id, false);
+
+          // مسح السلة محلياً بعد نجاح التسجيل
+          cartItems = [];
+          localStorage.setItem("cart", JSON.stringify(cartItems));
+          updateCartUI();
+          closeCart();
+
+          // المرحلة القادمة: تحويل المستخدم لصفحة الدفع
+          console.log(
+            `تم تجهيز الطلب ${data[0].id} للدفع عبر ${selectedMethod}`,
+          );
+        } catch (error) {
+          console.error("Database Error:", error);
+          showToast("فشل تسجيل الطلب: " + error.message, true);
+        }
+      }
+      const checkoutBtn = document.getElementById("checkout-btn");
+
+      if (checkoutBtn) {
+        checkoutBtn.addEventListener("click", async () => {
+          if (cartItems.length === 0) {
+            showToast("السلة فارغة!", true);
+            return;
+          }
+
+          // جلب بيانات المستخدم الحالية من Supabase
+          const {
+            data: { user },
+          } = await supabaseClient.auth.getUser();
+
+          if (!user) {
+            // 1. لو زائر: نفتح النافذة (Guest Modal) التي قمت بإضافتها مسبقاً
+            openGuestModal();
+
+            // برمجة زر "متابعة الدفع" داخل نافذة الزائر
+            document.getElementById("confirm-guest-btn").onclick = async () => {
+              const email = guestInput.value.trim();
+              if (!email || !email.includes("@")) {
+                showToast("برجاء إدخال بريد إلكتروني صحيح", true);
+                return;
+              }
+              closeGuestModal();
+              await processOrder(null, email); // استدعاء الدالة الموحدة
+            };
+          } else {
+            // 2. لو مسجل دخول: نستدعي الدالة مباشرة ببيانات حسابه
+            await processOrder(user.id, user.email);
+          }
+        });
+      }
+      const guestModal = document.getElementById("guest-modal");
+      const guestInput = document.getElementById("guest-field-email");
+
+      function openGuestModal() {
+        guestModal.classList.remove("hidden");
+        setTimeout(() => {
+          guestModal.classList.remove("opacity-0", "pointer-events-none");
+          guestModal.querySelector("div").classList.remove("scale-95");
+        }, 10);
+      }
+
+      function closeGuestModal() {
+        guestModal.classList.add("opacity-0", "pointer-events-none");
+        guestModal.querySelector("div").classList.add("scale-95");
+        setTimeout(() => guestModal.classList.add("hidden"), 300);
+      }
+
+      // إغلاق عند الضغط على إلغاء
+      document.getElementById("cancel-guest-btn").onclick = closeGuestModal;
+    </script>
+  </body>
+</html>

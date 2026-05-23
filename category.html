@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="32x32" href="gg.png" />
+    <title id="page-title">المتجر | GGhub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap");
+      body {
+        font-family: "Tajawal", sans-serif;
+      }
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #111827;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #8b5cf6;
+        border-radius: 5px;
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: { purple: "#8b5cf6", dark: "#0f172a", card: "#1e293b" },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-black text-gray-100 antialiased overflow-x-hidden">
+    <canvas
+      id="particle-canvas"
+      class="fixed inset-0 pointer-events-none z-[-1]"
+    ></canvas>
+
+    <nav
+      class="bg-black/80 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50"
+    >
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+          <a
+            href="index2.html"
+            class="flex-shrink-0 flex items-center cursor-pointer"
+          >
+            <img
+              src="gg.png"
+              alt="GGhub Logo"
+              class="w-16 h-16 object-contain"
+            />
+            <span class="font-black text-4xl tracking-wider"
+              >GG<span class="text-yellow-500">hub</span></span
+            >
+          </a>
+
+          <div class="hidden md:flex items-center gap-8">
+            <a
+              href="category.html?game=pubg"
+              class="text-gray-300 hover:text-white transition font-bold flex items-center gap-2"
+            >
+              <img src="pubg.png" alt="PUBG" class="w-6 h-6 object-contain" />
+              Pubg Mobile
+            </a>
+            <a
+              href="category.html?game=overwatch"
+              class="text-gray-300 hover:text-white transition font-bold flex items-center gap-2"
+            >
+              <img
+                src="overwatch.png"
+                alt="Overwatch"
+                class="w-6 h-6 object-contain"
+              />
+              Overwatch 2
+            </a>
+            <a
+              href="category.html?game=marvel"
+              class="text-gray-300 hover:text-white transition font-bold flex items-center gap-2"
+            >
+              <img
+                src="marvel.png"
+                alt="Marvel"
+                class="w-6 h-6 object-contain"
+              />
+              Marvel Rivals
+            </a>
+            <a
+              href="category.html?game=valorant"
+              class="text-gray-300 hover:text-white transition font-bold flex items-center gap-2"
+            >
+              <img
+                src="valorant.png"
+                alt="Valorant"
+                class="w-6 h-6 object-contain"
+              />
+              VALORANT
+            </a>
+          </div>
+
+          <div class="hidden md:flex items-center gap-6">
+            <button
+              id="cart-btn"
+              class="relative text-gray-300 hover:text-white transition"
+            >
+              <i class="fas fa-shopping-cart text-xl"></i>
+              <span
+                id="cart-badge"
+                class="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                >0</span
+              >
+            </button>
+            <button
+              id="user-btn"
+              class="text-gray-300 hover:text-white transition"
+            >
+              <i class="fas fa-user-circle text-2xl"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div
+      class="relative w-full h-[35vh] md:h-[45vh] flex flex-col justify-end overflow-hidden"
+    >
+      <img
+        id="category-bg"
+        src=""
+        alt="Category Cover"
+        class="absolute inset-0 w-full h-full object-cover z-0 opacity-40"
+      />
+
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent z-10"
+      ></div>
+
+      <div class="relative z-20 container mx-auto px-4 pb-8 text-right">
+        <h1
+          id="category-title"
+          class="text-4xl md:text-5xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-400 inline-block"
+        >
+          جاري التحميل...
+        </h1>
+        <p id="category-subtitle" class="text-gray-400 text-sm md:text-base">
+          استكشف أفضل الأدوات والاشتراكات المتاحة حصرياً
+        </p>
+      </div>
+    </div>
+
+    <main class="container mx-auto px-4 py-12">
+      <div
+        id="cards-grid"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+      ></div>
+    </main>
+
+    <footer
+      class="bg-black pt-12 pb-8 border-t border-gray-900 mt-12 text-center text-sm text-gray-500"
+    >
+      <p>&copy; 2024 متجر GGhub. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <script>
+      // 1. قاعدة بيانات المنتجات مصنفة حسب الألعاب
+      // 1. قاعدة بيانات المنتجات مصنفة مع إضافة البانر الخاص بكل لعبة
+      const categoriesDatabase = {
+        pubg: {
+          title: "PUBG MOBILE", // هيفضل نص عادي عشان تاب المتصفح وعشان الـ alt
+          logo: "pubg.png",
+          banner:
+            "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+          items: [
+            {
+              id: "bratva_day",
+              name: "Bratva VIP 1 Day",
+              price: "$2.99",
+              oldPrice: "$4.99",
+              image:
+                "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+              tag: "offer",
+            },
+            {
+              id: "bratva_week",
+              name: "Bratva VIP 1 Week",
+              price: "$9.99",
+              oldPrice: "$5.99",
+              image:
+                "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+              tag: "offer",
+            },
+            {
+              id: "bratva_month",
+              name: "Bratva VIP 1 Month",
+              price: "$39.99",
+              oldPrice: "$29.99",
+              image:
+                "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+              tag: "offer",
+            },
+            {
+              id: "dragon_day",
+              name: "dragon VIP 1 Day",
+              price: "$2.99",
+              oldPrice: "$4.99",
+              image:
+                "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+              tag: "offer",
+            },
+            {
+              id: "dragon_week",
+              name: "dragon VIP 1 Week",
+              price: "$9.99",
+              oldPrice: "$5.99",
+              image:
+                "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+              tag: "offer",
+            },
+            {
+              id: "dragon_month",
+              name: "dragon VIP 1 Month",
+              price: "$39.99",
+              oldPrice: "$29.99",
+              image:
+                "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+              tag: "offer",
+            },
+            {
+              id: "sauron_day",
+              name: "sauron VIP 1 Day",
+              price: "$2.99",
+              oldPrice: "$4.99",
+              image:
+                "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+              tag: "offer",
+            },
+            {
+              id: "sauron_week",
+              name: "sauron VIP 1 Week",
+              price: "$9.99",
+              oldPrice: "$5.99",
+              image:
+                "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+              tag: "offer",
+            },
+            {
+              id: "sauron_month",
+              name: "sauron VIP 1 Month",
+              price: "$39.99",
+              oldPrice: "$29.99",
+              image:
+                "https://i.postimg.cc/L6PctFRW/playerunknowns-3840x2160-20844.jpg",
+              tag: "offer",
+            },
+          ],
+        },
+        overwatch: {
+          title: "Overwatch 2",
+          banner:
+            "https://i.postimg.cc/5trgKjSw/reinhardt-overwatch-2-3840x2160-13030.jpg",
+          items: [
+            {
+              id: "sauron",
+              name: "Overwatch Premium Tool",
+              price: "$39.99",
+              oldPrice: null,
+              image:
+                "https://i.postimg.cc/5trgKjSw/reinhardt-overwatch-2-3840x2160-13030.jpg",
+              tag: "موصى به",
+            },
+          ],
+        },
+        marvel: {
+          title: "MARVEl",
+          logo: "marvel.png",
+          banner:
+            "https://i.postimg.cc/QNgTzHXY/fantastic-four-3840x2160-21136.jpg",
+          items: [
+            {
+              id: "spider_day",
+              name: "Spider 1 day",
+              price: "$3.99",
+              oldPrice: "$5.99",
+              image:
+                "https://i.postimg.cc/QNgTzHXY/fantastic-four-3840x2160-21136.jpg",
+              tag: "offer",
+            },
+            {
+              id: "spider_week",
+              name: "Spider 1 week",
+              price: "$5.99",
+              oldPrice: "$9.99",
+              image:
+                "https://i.postimg.cc/QNgTzHXY/fantastic-four-3840x2160-21136.jpg",
+              tag: "offer",
+            },
+            {
+              id: "spider_month",
+              name: "Spider 1 month",
+              price: "$29.99",
+              oldPrice: "$39.99",
+              image:
+                "https://i.postimg.cc/QNgTzHXY/fantastic-four-3840x2160-21136.jpg",
+              tag: "offer",
+            },
+          ],
+        },
+        overwatch: {
+          title: "OVER WATCH 2",
+          logo: "overwatch.png",
+          banner: "ov2.jpg",
+          items: [
+            {
+              id: "netflix_day",
+              name: "Netflix 1 day",
+              price: "$3.99",
+              oldPrice: "$5.99",
+              image: "ov2.jpg",
+              tag: "offer",
+            },
+            {
+              id: "netflix_week",
+              name: "Netflix 1 week",
+              price: "$5.99",
+              oldPrice: "$9.99",
+              image: "ov2.jpg",
+              tag: "offer",
+            },
+            {
+              id: "netflix_month",
+              name: "Netflix 1 month",
+              price: "$29.99",
+              oldPrice: "$39.99",
+              image: "ov2.jpg",
+            },
+          ],
+        },
+        valorant: {
+          title: "VALORANT",
+          logo: "valorant.png",
+          banner:
+            "https://i.postimg.cc/0Q2JsY0n/valorant-reyna-jett-omen-phoenix-sova-sage-breachrant-3840x2160-7475.jpg",
+          items: [
+            {
+              id: "hanzo_day",
+              name: "Hanzo V₂ 1 day",
+              price: "$3.99",
+              oldPrice: "$5.99",
+              image:
+                "https://i.postimg.cc/0Q2JsY0n/valorant-reyna-jett-omen-phoenix-sova-sage-breachrant-3840x2160-7475.jpg",
+              tag: "offer",
+            },
+            {
+              id: "hanzo_week",
+              name: "Hanzo V₂ 1 week",
+              price: "$5.99",
+              oldPrice: "$9.99",
+              image:
+                "https://i.postimg.cc/0Q2JsY0n/valorant-reyna-jett-omen-phoenix-sova-sage-breachrant-3840x2160-7475.jpg",
+              tag: "offer",
+            },
+            {
+              id: "hanzo_month",
+              name: "Hanzo V₂ 1 month",
+              price: "$29.99",
+              oldPrice: "$39.99",
+              image:
+                "https://i.postimg.cc/0Q2JsY0n/valorant-reyna-jett-omen-phoenix-sova-sage-breachrant-3840x2160-7475.jpg",
+              tag: "offer",
+            },
+          ],
+        },
+      };
+
+      // 2. قراءة اسم اللعبة من الرابط وعرض الكروت الخاصة بها
+      document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        let gameKey = urlParams.get("game");
+
+        // إذا لم يكن هناك بارامتر، نختار pubg كافتراضي
+        if (!gameKey || !categoriesDatabase[gameKey]) {
+          gameKey = "pubg";
+        }
+
+        const category = categoriesDatabase[gameKey];
+
+        // تحديث العناوين
+        document.getElementById("page-title").innerText =
+          `${category.title} | GGhub`;
+        document.getElementById("category-title").innerText = category.title;
+        document.getElementById("category-bg").src = category.banner;
+
+        // حقن الكروت وتنسيقها بنفس تصميم المظهر الاحترافي
+        const grid = document.getElementById("cards-grid");
+        grid.innerHTML = "";
+
+        category.items.forEach((item) => {
+          let tagHtml = item.tag
+            ? `<div class="absolute top-3 right-3 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded shadow">${item.tag}</div>`
+            : "";
+          let oldPriceHtml = item.oldPrice
+            ? `<span class="text-gray-500 line-through text-xs">${item.oldPrice}</span>`
+            : "";
+
+          // السطرين دول جداد: بنجهز كود اللوجو أو النص
+          let logoOrTextHtml = category.logo
+            ? `<img src="${category.logo}" alt="${category.title}" class="h-10 w-auto mb-4 object-contain" />`
+            : `<p class="text-gray-400 text-sm mb-4">${category.title}</p>`;
+
+          grid.innerHTML += `
+            <a href="game-details.html?id=${item.id}" class="bg-brand-card rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-yellow-500/80 hover:shadow-[0_0_20px_rgba(234,179,8,0.3)] transition-all group block cursor-pointer">
+              <div class="relative h-56 overflow-hidden">
+                <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                ${tagHtml}
+              </div>
+              <div class="p-5">
+                <h3 class="font-bold text-lg text-white line-clamp-1 group-hover:text-yellow-500 transition">${item.name}</h3>
+
+                ${logoOrTextHtml}
+
+                <div class="flex items-center justify-between mt-auto">
+                  <div class="flex flex-col">
+                    ${oldPriceHtml}
+                    <span class="text-xl font-bold text-yellow-500">${item.price}</span>
+                  </div>
+                  <span class="text-gray-500 group-hover:text-white transition"><i class="fas fa-chevron-left text-sm"></i></span>
+                </div>
+              </div>
+            </a>
+          `;
+        });
+      });
+
+      // --- نظام الجزيئات الذهبية الخلفية (نفس الكود الخاص بك لتوحيد التصميم) ---
+      const canvas = document.getElementById("particle-canvas");
+      const ctx = canvas.getContext("2d");
+      let particlesArray = [];
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 0.5;
+          this.speedX = Math.random() * 0.5 - 0.25;
+          this.speedY = Math.random() * 1.5 + 0.5;
+          this.alpha = Math.random() * 0.7 + 0.3;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y -= this.speedY;
+          if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+          if (this.y < 0) {
+            this.y = canvas.height;
+            this.x = Math.random() * canvas.width;
+          }
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 215, 0, ${this.alpha})`;
+          ctx.fill();
+        }
+      }
+      function initParticles() {
+        particlesArray = [];
+        const numberOfParticles = Math.floor(
+          (canvas.width * canvas.height) / 12000,
+        );
+        for (let i = 0; i < numberOfParticles; i++)
+          particlesArray.push(new Particle());
+      }
+      function connectParticles() {
+        for (let a = 0; a < particlesArray.length; a++) {
+          for (let b = a; b < particlesArray.length; b++) {
+            let dx = particlesArray[a].x - particlesArray[b].x;
+            let dy = particlesArray[a].y - particlesArray[b].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 130) {
+              ctx.strokeStyle = `rgba(255, 215, 0, ${(1 - distance / 130) * 0.4})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+              ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+      function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particlesArray.length; i++) {
+          particlesArray[i].update();
+          particlesArray[i].draw();
+        }
+        connectParticles();
+        requestAnimationFrame(animateParticles);
+      }
+      resizeCanvas();
+      initParticles();
+      animateParticles();
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        initParticles();
+      });
+    </script>
+  </body>
+</html>
