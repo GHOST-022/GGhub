@@ -87,13 +87,11 @@
       .animate-marquee {
         display: flex;
         width: max-content;
-        /* الحركة من اليسار لليمين (تم تبطيئها لـ 50 ثانية) */
         animation: marqueeRTL 150s linear infinite;
       }
       .animate-marquee-reverse {
         display: flex;
         width: max-content;
-        /* الحركة من اليمين لليسار عكس الصور (بطيئة) */
         animation: marqueeLTR 350s linear infinite;
       }
       .animate-marquee:hover,
@@ -328,7 +326,6 @@
           ></div>
 
           <div id="reviews-container" class="animate-marquee-reverse">
-            <!-- سيتم حقن التقييمات هنا عبر الجافاسكريبت -->
           </div>
         </div>
       </section>
@@ -1017,11 +1014,9 @@
         document.getElementById("single-duration").innerText =
           `/ ${game.duration}`;
 
-        // --- حقن اللقطات المتحركة (Screenshots) ---
         const track = document.getElementById("screenshots-track");
         track.innerHTML = "";
         if (game.screenshots && game.screenshots.length > 0) {
-          // نضاعف المصفوفة عدة مرات لعمل تأثير الحركة اللانهائية بدون تقطيع
           const duplicatedScreenshots = Array(20).fill(game.screenshots).flat();
           duplicatedScreenshots.forEach((src) => {
             track.innerHTML += `
@@ -1030,14 +1025,11 @@
           });
         }
 
-        // --- حقن تقييمات المشترين (Reviews) ---
         const reviewsContainer = document.getElementById("reviews-container");
         reviewsContainer.innerHTML = "";
         if (game.reviews && game.reviews.length > 0) {
-          // نضاعف المصفوفة عدة مرات لعمل تأثير الحركة اللانهائية بدون تقطيع
           const duplicatedReviews = Array(20).fill(game.reviews).flat();
           duplicatedReviews.forEach((review) => {
-            // رسم النجوم ديناميكياً
             let starsHtml = "";
             for (let i = 0; i < 5; i++) {
               starsHtml += `<i class="fas fa-star ${i < review.rating ? "text-yellow-400" : "text-gray-600"} text-xs"></i>`;
@@ -1064,12 +1056,10 @@
           });
         }
 
-        // إعطاء أوامر للأزرار بناءً على اللعبة الحالية
         document.getElementById("btn-buy-single").onclick = () =>
           addToCart(`${game.name} (${game.duration})`, game.price);
       });
 
-      // --- Cart Logic ---
       let cartItems = JSON.parse(localStorage.getItem("cart")) || [];
       const cartModal = document.getElementById("cart-modal");
       const closeCartBtn = document.getElementById("close-cart-btn");
@@ -1099,7 +1089,6 @@
           }
         });
 
-        // 2. تحديث محتوى السلة الداخلي
         const container = document.getElementById("cart-items-container");
         const totalEl = document.getElementById("cart-total");
 
