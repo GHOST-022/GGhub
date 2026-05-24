@@ -125,7 +125,7 @@
               class="text-gray-300 hover:text-white transition font-bold flex items-center gap-2"
             >
               <img src="pubg.png" alt="PUBG" class="w-6 h-6 object-contain" />
-              PUBG MOBILE
+              Pubg Mobile
             </a>
             <a
               href="category.html?game=overwatch"
@@ -186,6 +186,14 @@
                 >0</span
               >
             </button>
+
+            <a
+              href="admin.html"
+              id="admin-link"
+              class="hidden bg-purple-600/20 text-purple-400 hover:bg-purple-600 hover:text-white px-4 py-2 rounded-lg text-sm font-bold transition items-center gap-2"
+            >
+              <i class="fas fa-chart-line"></i> Dashboard
+            </a>
 
             <button
               id="user-btn"
@@ -2217,14 +2225,26 @@
       // --- تحديث واجهة المستخدم بناءً على حالة تسجيل الدخول ---
       function updateAuthUI(user) {
         const userBtn = document.getElementById("user-btn");
+        const adminLink = document.getElementById("admin-link");
         if (!userBtn) return;
 
         if (user) {
-          // لو المستخدم مسجل دخول: غير الأيقونة لزرار خروج وخلي لونها أحمر خفيف
+          // 1. التعامل مع زر لوحة الإدارة (للأدمن فقط)
+          if (user.email === "admin@gmail.com") {
+            if (adminLink) {
+              adminLink.classList.remove("hidden");
+              adminLink.classList.add("flex");
+            }
+          } else {
+            if (adminLink) {
+              adminLink.classList.remove("flex");
+              adminLink.classList.add("hidden");
+            }
+          }
+
+          // 2. التعامل مع زر تسجيل الخروج (لأي مستخدم مسجل دخول سواء أدمن أو عادي)
           userBtn.innerHTML = `<i class="fas fa-sign-out-alt text-2xl text-red-400 hover:text-red-500 transition"></i>`;
           userBtn.title = "تسجيل الخروج (" + user.email + ")";
-
-          // تغيير وظيفة الزرار عند الضغط عليه ليكون "خروج" بدلاً من فتح النافذة
           userBtn.onclick = async () => {
             const { error } = await supabaseClient.auth.signOut();
             if (error) {
@@ -2234,7 +2254,12 @@
             }
           };
         } else {
-          // لو مش مسجل دخول: ارجع للشكل الأصلي ووظيفة فتح النافذة
+          // 3. التعامل مع الزائر (غير مسجل الدخول)
+          if (adminLink) {
+            adminLink.classList.remove("flex");
+            adminLink.classList.add("hidden");
+          }
+
           userBtn.innerHTML = `<i class="fas fa-user-circle text-2xl"></i>`;
           userBtn.title = "تسجيل الدخول / إنشاء حساب";
           userBtn.onclick = openAuth;
